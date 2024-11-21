@@ -1,81 +1,170 @@
-# Testing the stack
+# Testing the Future Earth Stack
 
-## Launch Compose Environment
+## Prerequisites
 
-To set up and run the complete environment, use Docker Compose to bring up all services. Ensure you have Docker and Docker Compose installed.
+- Docker and Docker Compose installed
+- Node.js 18+ (for local development)
+- Make (optional, for using Makefile commands)
+
+## Building the Base Image
+
+Before running the stack, build the base service image:
 
 ```bash
-docker-compose -p srt-8192-dev up -d
+# From the backend/services/base directory
+docker build -t srt-8192/base-service -f Dockerfile .
 ```
 
-This command will start all defined services in the `docker-compose.yml` file.
+## Launch Development Environment
 
-## Backend Testing
+Start the complete environment with hot-reloading enabled:
 
-### Overview
-The backend is composed of multiple services, such as game logic, matchmaking, leaderboard, and more. Each of these services needs to be tested individually as well as in integration. Below, we'll provide steps to manually test these individual backend services.
+```bash
+# From the root directory
+docker compose -p future-earth-dev up --build -d
+```
 
-1. **Access Backend Containers Individually**
-   - Each backend service is running in its own container. To manually test and debug a specific service, first enter the respective container. For example, to access the game logic service, use:
-   
+## Testing Individual Services
+
+### Backend Services Testing
+
+Each service can be tested in isolation or as part of the integrated stack.
+
+#### 1. Individual Service Testing
+
+```bash
+# Example for AI Service
+cd backend/services/ai-service
+
+# Install dependencies
+npm install
+
+# Run unit tests
+npm run test
+
+# Run integration tests
+npm run test:integration
+
+# Run linting
+npm run lint
+```
+
+#### 2. Container-based Testing
+
+Access and test services running in containers:
+
+```bash
+# Access AI Service container
+docker exec -it future-earth-dev-ai-service-1 sh
+
+# Run tests inside container
+npm run test
+```
+
+#### 3. Health Check Verification
+
+Verify service health endpoints:
+
+```bash
+# Example for AI Service
+curl http://localhost:5002/health
+
+# Check all services health
+for port in {5001..5007}; do
+  echo "Checking service on port $port"
+  curl -s http://localhost:$port/health
+done
+```
+
+### Database Integration Testing
+
+Verify database connections:
+
+```bash
+# Check MongoDB connection
+docker exec -it future-earth-dev-mongodb-1 mongosh --eval "db.adminCommand('ping')"
+
+# Check Redis connection
+docker exec -it future-earth-dev-redis-1 redis-cli ping
+```
+
+## Development Workflow
+
+1. **Local Development**:
    ```bash
-   docker exec -it srt-8192-dev_game-logic_1 sh
+   # Start dependencies only
+   docker compose -p future-earth-dev up mongodb redis -d
+   
+   # Run service locally
+   cd backend/services/ai-service
+   npm run dev
    ```
-   
-   Similarly, replace `game-logic` with the appropriate service name, like `leaderboard`, `matchmaking`, etc., to access other services.
 
-2. **Install Dependencies & Build**
-   - Run the following commands inside the respective service container to ensure all dependencies are installed and the service is correctly built:
-   
+2. **Hot Reload Development**:
    ```bash
-   npm install
-   npm run build
+   # Start everything with volume mounts
+   docker compose -p future-earth-dev up --build -d
    ```
 
-3. **Run Tests**
-   - To run unit or integration tests for each backend service, use:
-   
+3. **Production Build Testing**:
    ```bash
-   npm run test
+   # Build and start with production configuration
+   NODE_ENV=production docker compose -p future-earth-prod up --build -d
    ```
 
-   Make sure to execute these steps inside each container to verify that all backend services are working correctly and communicating as expected.
-   - If you have unit or integration tests defined, run them with:
-   
-   ```bash
-   npm run test
-   ```
+## Common Testing Commands
 
-## Frontend Testing
+```bash
+# Run all service tests
+make test-all
 
-1. **Access the Frontend Container**
-   - To manually test and debug the frontend, enter the frontend container:
-   
-   ```bash
-   docker exec -it srt-8192-dev_frontend_1 sh
-   ```
+# Run specific service tests
+make test SERVICE=ai-service
 
-2. **Install Dependencies & Build**
-   - Run the following commands inside the container to install the dependencies and build the project:
-   
-   ```bash
-   npm install
-   npm run build
-   ```
+# Run linting across all services
+make lint-all
 
-3. **Serve the Frontend**
-   - If testing locally, you can serve the frontend using:
-   
-   ```bash
-   npm install -g serve
-   serve -s build
-   ```
-   - Alternatively, ensure that the frontend is accessible through the port defined in the `docker-compose.yml` file.
+# Run integration tests
+make test-integration
+```
 
 ## Cleanup
 
-To stop the Docker Compose environment and remove all related containers:
-
 ```bash
-docker-compose -p srt-8192-dev down
+# Stop and remove containers
+docker compose -p future-earth-dev down
+
+# Clean up volumes
+docker compose -p future-earth-dev down -v
+
+# Remove all related images
+docker compose -p future-earth-dev down --rmi all
 ```
+
+## Troubleshooting
+
+1. **Service Dependencies**:
+   - Check logs: `docker compose logs -f [service-name]`
+   - Verify environment variables: `docker compose config`
+   - Check network connectivity: `docker network inspect future-earth-dev_default`
+
+2. **Common Issues**:
+   - Port conflicts: Ensure no local services are using required ports
+   - Database connection: Verify MongoDB/Redis credentials and connectivity
+   - Build failures: Check for missing dependencies in package.json
+
+3. **Debug Mode**:
+   ```bash
+   # Start with debug logging
+   DEBUG=* docker compose up [service-name]
+   ```
+
+## CI/CD Testing
+
+The repository includes GitHub Actions workflows for automated testing:
+
+- Pull Request: `/.github/workflows/pr-test.yml`
+- Integration: `/.github/workflows/integration-test.yml`
+- Deployment: `/.github/workflows/deploy-test.yml`
+
+Review these workflows for detailed testing procedures in the CI/CD pipeline.
