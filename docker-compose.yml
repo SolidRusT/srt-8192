@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  backend:
+    build: ./backend
+    container_name: 8192_backend
+    ports:
+      - "5000:5000" # Expose backend API on port 5000
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=mongodb://db:27017/8192_game
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    container_name: 8192_frontend
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_BACKEND_URL=http://backend:5000
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  db:
+    image: mongo:latest
+    container_name: 8192_db
+    ports:
+      - "27017:27017" # Expose MongoDB on the default port
+    volumes:
+      - db_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  db_data:
+
+networks:
+  default:
+    driver: bridge
