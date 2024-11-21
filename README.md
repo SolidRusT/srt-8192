@@ -6,139 +6,126 @@
 
 **8192** is part of a larger simulation game called **LeadSim**, which itself is part of the expansive virtual world known as **Future Earth**, developed and operated by **SolidRusT Networks (SRT)**.
 
-## Repository Information
+## Core Features
 
-- **GitHub Repository**: [https://github.com/SolidRusT/srt-8192](https://github.com/SolidRusT/srt-8192)
-- **Developer Website**: [https://solidrust.net](https://solidrust.net)
-- **License**: MIT License
+- **Turn-Based Strategy**: Experience deep strategic gameplay with 8192-cycle game sessions
+- **Leadership Development**: Learn and apply real-world leadership skills
+- **AI Integration**: Face an adaptive AI opponent that learns from global player behavior
+- **Real-World Data**: Game mechanics influenced by real-world economic and geopolitical data
+- **Permanent Progress**: Keep your rewards and advancement across game cycles
 
-## Features
+## Technology Stack
 
-- **Turn-Based Gameplay**: Engage in strategic turn-based competition that resets every 8192 cycles.
-- **Leadership Skills Development**: Players develop military, economic, and leadership skills through challenges and decision-making.
-- **Real-World Data Integration**: The game dynamically adapts based on real-world data, including climate, economic, and geopolitical events.
-- **Advanced AI Opponent**: The AI adapts to player behavior and real-world events, offering a unique challenge each time.
-- **Permanent Rewards**: Earn and retain in-game coins, experience, badges, and rare cosmetic skins.
-- **Part of the Future Earth Virtual World**: Experience a cohesive world alongside other simulations from SolidRusT Networks.
+### Frontend (PlayerPortal)
+- React 18+ with TypeScript
+- Tailwind CSS for styling
+- Recoil for state management
+- Real-time updates via WebSocket
+- Progressive Web App capabilities
+
+### Backend (BrainCore)
+- Event-driven microservices architecture
+- Advanced AI opponent system (NexusMind)
+- Real-world data integration (DataForge)
+- Combat resolution engine
+- Resource management system
+
+### Infrastructure
+- Kubernetes deployment (ClusterCommander)
+- Multi-region cloud architecture
+- Event sourcing for game state
+- Real-time analytics and monitoring
+
+## Getting Started
+
+1. **Prerequisites**
+   ```bash
+   Node.js >= 18
+   Docker & Docker Compose
+   Kubernetes (for full deployment)
+   ```
+
+2. **Installation**
+   ```bash
+   git clone https://github.com/SolidRusT/srt-8192.git
+   cd srt-8192
+   npm install
+   ```
+
+3. **Development**
+   ```bash
+   # Start frontend development server
+   npm run dev
+
+   # Start backend services
+   docker-compose up
+   ```
+
+4. **Build & Deploy**
+   ```bash
+   # Build frontend
+   npm run build
+
+   # Deploy to Kubernetes
+   ./scripts/deploy.sh
+   ```
 
 ## Project Structure
 
 ```
 8192/
-├── backend (a.k.a. 'BrainCore')/
-│   ├── ai (a.k.a. 'NexusMind')/
-│   ├── services (a.k.a. 'OpsHub')/
-│   │   ├── matchmaking/
-│   │   ├── game-logic/
-│   │   ├── user-profile/
-│   │   └── economy-management/
-│   ├── utils (a.k.a. 'ToolKit')/
-│   ├── data-integration (a.k.a. 'DataForge')/
-│   └── serverless-functions (a.k.a. 'CloudSpirits')/
-│       ├── DataPulse/
-│       └── game-events-handler/
-├── frontend (a.k.a. 'PlayerPortal')/
-│   ├── components (a.k.a. 'LegoBlocks')/
-│   ├── pages (a.k.a. 'ViewScreens')/
-│   ├── hooks (a.k.a. 'MagicHooks')/
-│   ├── styles (a.k.a. 'RoboThreads')/
-│   └── utils/
-├── infra (a.k.a. 'SkyRig')/
-│   ├── k8s (a.k.a. 'ClusterCommander')/
-│   ├── terraform (a.k.a. 'TerraSculptor')/
-│   └── monitoring (a.k.a. 'EyeOfSauron')/
-├── docs (a.k.a. 'KnowledgeVault')/
-│   ├── architecture.md
-│   ├── game-mechanics.md
-│   ├── api-specs.md
-│   └── contributing.md
-├── scripts (a.k.a. 'Rituals')/
-│   ├── deploy.sh
-│   ├── build.sh
-│   └── setup-dev.sh
-├── tests (a.k.a. 'TrialGrounds')/
-│   ├── frontend/
-│   └── backend/
-├── README.md
-├── LICENSE
-└── .gitignore
+├── backend/
+│   ├── ai/                 # AI opponent logic & ML models
+│   ├── data-integration/   # Real-world data processing
+│   ├── game-logic/         # Core game mechanics
+│   └── services/           # Microservices (matchmaking, profiles, etc.)
+├── frontend/
+│   ├── components/         # React components
+│   ├── pages/             # Next.js pages
+│   ├── styles/            # Global styles & Tailwind config
+│   └── types/             # TypeScript definitions
+├── docs/                  # Documentation & design specs
+└── scripts/              # Deployment & maintenance scripts
 ```
 
-### Directory Breakdown
+## Key Components
 
-- **backend/**: Contains the core backend services, AI logic, utilities, and serverless functions.
-  - **ai/**: AI decision-making logic and ML models.
-  - **services/**: Microservices such as matchmaking, game-logic, user-profile, and economy-management.
-  - **utils/**: Reusable backend utilities and helpers.
-  - **data-integration/**: Manages integration with external real-world data sources.
-  - **serverless-functions/**: Stateless functions that run backend operations in a serverless environment.
-    - **real-world-data-fetcher/**: Handles real-time data fetching from climate, economy, etc.
-    - **game-events-handler/**: Manages game event triggers.
+### BrainCore (Backend)
+- **NexusMind**: Advanced AI opponent system using reinforcement learning
+- **DataForge**: Real-world data integration pipeline
+- **Combat Engine**: Sophisticated battle resolution system
+- **Resource Manager**: Economic and resource distribution system
 
-- **frontend/**: Contains the client-side application.
-  - **components/**: Reusable React components.
-  - **pages/**: Page-level components for the app.
-  - **hooks/**: Custom hooks to manage shared logic.
-  - **styles/**: Tailwind CSS styles and theming.
-  - **utils/**: Utility functions for the frontend.
+### PlayerPortal (Frontend)
+- **GameBoard**: Main game interface component
+- **ActionPanel**: Player control and command interface
+- **ResourceDisplay**: Resource management UI
+- **UnitManager**: Military unit control interface
 
-- **infra/**: Contains infrastructure-related configurations.
-  - **k8s/**: Kubernetes configurations for deployment.
-  - **terraform/**: Terraform scripts for provisioning cloud infrastructure.
-  - **monitoring/**: Monitoring and alerting setup.
+## Contributing
 
-- **docs/**: Project documentation.
-  - **architecture.md**: Detailed documentation of the system architecture.
-  - **game-mechanics.md**: Explanation of game rules and mechanics.
-  - **api-specs.md**: Specifications for API endpoints.
-  - **contributing.md**: Guidelines for contributing to the project.
-
-- **scripts/**: Helpful scripts for deployment, building, and setting up the development environment.
-
-- **tests/**: Contains automated test cases.
-  - **frontend/**: Frontend unit and integration tests.
-  - **backend/**: Backend services and API tests.
-
-- **README.md**: The main project overview and instructions (this file).
-- **LICENSE**: Licensing information (MIT License).
-- **.gitignore**: Specifies intentionally untracked files to ignore.
-
-## Getting Started
-
-### Prerequisites
-- **Node.js** and **npm** for frontend development.
-- **Docker** and **Kubernetes** for containerized development and testing.
-- **Terraform** for provisioning cloud infrastructure.
-
-### Setup Instructions
-1. **Clone the Repository**:
-   ```sh
-   git clone https://github.com/SolidRusT/srt-8192.git
-   cd srt-8192
-   ```
-
-2. **Install Frontend Dependencies**:
-   ```sh
-   cd frontend
-   npm install
-   ```
-
-3. **Run Frontend Development Server**:
-   ```sh
-   npm run dev
-   ```
-
-4. **Deploy Backend Services** (using Kubernetes and Terraform):
-   ```sh
-   ./scripts/deploy.sh
-   ```
-
-### Contributing
-We welcome contributions from the community! Please see our [contributing guidelines](./docs/contributing.md) for more information on how to get started.
+Please read our [Contributing Guidelines](./CONTRIBUTING.md) before submitting pull requests. Join our [Discord server](https://discord.gg/UMWQmCz7uF) for discussions and updates.
 
 ## License
-This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## Security
+
+For security concerns, please review our [Security Policy](./SECURITY.md).
+
+## Support
+
+- Documentation: [docs/](./docs/)
+- Discord: [Join Server](https://discord.gg/UMWQmCz7uF)
+- Email: support@solidrust.net
 
 ## Acknowledgments
-- **SolidRusT Networks** for the development and operation of the **Future Earth** virtual world.
-- All contributors and playtesters who help make **8192** a great experience!
+
+- The SolidRusT Networks team
+- Our active community of playtesters
+- All contributors to the LeadSim project
+
+---
+
+Built with 💙 by SolidRusT Networks

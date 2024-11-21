@@ -9,12 +9,15 @@ pip install -U llm-file-combiner
 data_folder="data"
 public_folder="public"
 input_folders=(
-    "docs"
+    "frontend"
+    "backend"
 )
 docs_folders=(
     "docs/"
 )
 app_folders=(
+    "frontend"
+    "backend"
     "scripts"
 )
 
@@ -88,9 +91,10 @@ extensions=(
 ## Declare Functions
 # remove generated files
 function clean_build(){
-    rm -rf "$public_folder/static"
-    for folder in `find src/services -type d | grep shared`; do rm $folder/kafka_models.py; done
-    for folder in `find src/scripts -type d | grep shared`; do rm $folder/kafka_models.py; done
+    echo "Nothing to do"
+    #rm -rf "$public_folder/static"
+    #for folder in `find src/services -type d | grep shared`; do rm $folder/kafka_models.py; done
+    #for folder in `find src/scripts -type d | grep shared`; do rm $folder/kafka_models.py; done
 }
 
 # main combiner function
@@ -126,8 +130,8 @@ for input_folder in "${input_folders[@]}"; do
 done
 
 # Run combiner for each component
-for folder in `find src/services -type d | grep shared`; do cp src/shared/kafka_models.py $folder/kafka_models.py; done
-for folder in `find src/scripts -type d | grep shared`; do cp src/shared/kafka_models.py $folder/kafka_models.py; done
+#for folder in `find src/services -type d | grep shared`; do cp src/shared/kafka_models.py $folder/kafka_models.py; done
+#for folder in `find src/scripts -type d | grep shared`; do cp src/shared/kafka_models.py $folder/kafka_models.py; done
 
 for app_folder in "${app_folders[@]}"; do
     echo "Combining files in $app_folder"
