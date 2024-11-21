@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { GameState } from './GameState';
+import { GameState } from '../GameState';
 import {
   GamePhase,
   GameSession,
@@ -13,7 +13,7 @@ import {
   ServerGameCycle,
   ActionId,
   PhaseConfig
-} from './types';
+} from '../types';
 
 export class TurnManager extends EventEmitter {
   private gameState: GameState;

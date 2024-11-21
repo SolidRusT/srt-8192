@@ -18,7 +18,7 @@ import {
   EventVisibility,
   WorldEventType,
   AIActivityMetrics
-} from './types';
+} from '../types';
 
 /**
  * GameState manages the core game state and provides methods for state manipulation

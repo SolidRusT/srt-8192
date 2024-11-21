@@ -11,7 +11,9 @@ import {
   GameEvent,
   GameEventType,
   EventVisibility
-} from './types';
+} from '../types';
+
+import { ClimateSystem, ClimateEffect } from '../../../data-integration/src/ClimateSystem';
 
 interface WorldStateConfig {
   updateInterval: number;
@@ -20,6 +22,13 @@ interface WorldStateConfig {
   baseTemperature: number;
   temperatureVariance: number;
   eventProbability: number;
+  climate?: {
+    baseTemperature: number;
+    temperatureVariance: number;
+    disasterProbability: number;
+    weatherChangeProbability: number;
+    updateInterval: number;
+  };
 }
 
 export class WorldStateManager extends EventEmitter {
@@ -27,6 +36,7 @@ export class WorldStateManager extends EventEmitter {
   private updateInterval: NodeJS.Timeout | null;
   private readonly config: WorldStateConfig;
   private activeEventTimers: Map<string, NodeJS.Timeout>;
+  private climateSystem: ClimateSystem;
 
   constructor(config?: Partial<WorldStateConfig>) {
     super();
@@ -37,10 +47,97 @@ export class WorldStateManager extends EventEmitter {
       baseTemperature: 20,
       temperatureVariance: 10,
       eventProbability: 0.1,
+      climate: {
+        baseTemperature: 20,
+        temperatureVariance: 10,
+        disasterProbability: 0.01,
+        weatherChangeProbability: 0.1,
+        updateInterval: 60000,
+      },
       ...config
     };
+
+    // Initialize climate system
+    this.climateSystem = new ClimateSystem(this.config.climate);
+    this.setupClimateListeners();
+
     this.currentState = this.initializeWorldState();
     this.activeEventTimers = new Map();
+  }
+
+  /**
+   * Set up climate system event listeners
+   */
+  private setupClimateListeners(): void {
+    this.climateSystem.on('climateEvent', (event: GameEvent) => {
+      this.handleClimateEvent(event);
+    });
+
+    this.climateSystem.on('climateUpdated', (climateState) => {
+      this.updateClimateState(climateState);
+    });
+
+    this.climateSystem.on('effectExpired', (effect: ClimateEffect) => {
+      this.handleExpiredClimateEffect(effect);
+    });
+  }
+
+  /**
+   * Handle climate events
+   */
+  private handleClimateEvent(event: GameEvent): void {
+    const climateEffect = event.data.effect as ClimateEffect;
+
+    // Update weather conditions based on climate effect
+    if (climateEffect.type === 'weather') {
+      this.currentState.weatherConditions = [
+        ...this.currentState.weatherConditions,
+        {
+          type: climateEffect.type,
+          severity: climateEffect.severity,
+          duration: climateEffect.duration,
+          effects: Object.entries(climateEffect.resourceImpact).map(([resource, impact]) => ({
+            target: resource,
+            modifier: impact,
+            duration: climateEffect.duration
+          }))
+        }
+      ];
+    }
+
+    // Apply resource impacts
+    this.modifyResourceAvailability(climateEffect.resourceImpact);
+
+    // Emit game event
+    this.emitGameEvent(event);
+  }
+
+  /**
+   * Update climate state
+   */
+  private updateClimateState(climateState: { temperature: number; activeEffects: ClimateEffect[] }): void {
+    this.currentState.temperature = climateState.temperature;
+
+    // Update any other climate-related state properties
+    this.emit('worldStateUpdated', this.currentState);
+  }
+
+  /**
+   * Handle expired climate effects
+   */
+  private handleExpiredClimateEffect(effect: ClimateEffect): void {
+    // Remove expired weather conditions
+    this.currentState.weatherConditions = this.currentState.weatherConditions.filter(
+      condition => condition.type !== effect.type
+    );
+
+    // Revert resource impacts
+    const revertedImpacts = Object.entries(effect.resourceImpact).reduce((acc, [resource, impact]) => ({
+      ...acc,
+      [resource]: -impact / 2 // Partial recovery
+    }), {});
+
+    this.modifyResourceAvailability(revertedImpacts);
   }
 
   /**
@@ -78,6 +175,10 @@ export class WorldStateManager extends EventEmitter {
         () => this.updateWorldState(),
         this.config.updateInterval
       );
+      
+      // Start climate system
+      this.climateSystem.start();
+      
       this.emit('worldStateStarted', this.currentState);
     }
   }
@@ -89,6 +190,10 @@ export class WorldStateManager extends EventEmitter {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
+      
+      // Stop climate system
+      this.climateSystem.stop();
+      
       this.emit('worldStateStopped');
     }
   }
@@ -109,6 +214,11 @@ export class WorldStateManager extends EventEmitter {
     // Update AI metrics
     this.updateAIMetrics();
 
+    // Apply climate effects to regions
+    if (this.regions) {
+      this.climateSystem.applyClimateEffects(this.regions);
+    }
+
     // Emit updated state
     this.emit('worldStateUpdated', this.currentState);
   }
@@ -127,8 +237,8 @@ export class WorldStateManager extends EventEmitter {
       )
     );
 
-    // Update weather conditions
-    this.updateWeatherConditions();
+    // Remove this as it's now handled by climate system
+    // this.updateWeatherConditions();
   }
 
   /**
@@ -166,7 +276,7 @@ export class WorldStateManager extends EventEmitter {
     ];
 
     const selected = conditions[Math.floor(Math.random() * conditions.length)];
-    
+
     return {
       type: selected.type,
       severity: Math.random() * selected.maxSeverity,
@@ -243,7 +353,7 @@ export class WorldStateManager extends EventEmitter {
 
     // Normalize probabilities
     const total = adjustedEvents.reduce((sum, [_, prob]) => sum + prob, 0);
-    const normalized = adjustedEvents.map(([event, prob]) => 
+    const normalized = adjustedEvents.map(([event, prob]) =>
       [event, prob / total] as [WorldEventType, number]
     );
 
@@ -274,12 +384,12 @@ export class WorldStateManager extends EventEmitter {
     };
 
     this.currentState.activeEvents.push(event);
-    
+
     // Set up timer to end event
     const timer = setTimeout(() => {
       this.endWorldEvent(event.id);
     }, event.duration * 1000);
-    
+
     this.activeEventTimers.set(event.id, timer);
 
     // Apply immediate effects
@@ -304,11 +414,11 @@ export class WorldStateManager extends EventEmitter {
   private endWorldEvent(eventId: string): void {
     const eventIndex = this.currentState.activeEvents
       .findIndex(e => e.id === eventId);
-    
+
     if (eventIndex >= 0) {
       const event = this.currentState.activeEvents[eventIndex];
       this.currentState.activeEvents.splice(eventIndex, 1);
-      
+
       // Clear timer
       const timer = this.activeEventTimers.get(eventId);
       if (timer) {
@@ -439,7 +549,7 @@ export class WorldStateManager extends EventEmitter {
       // Gradual changes based on world state
       const stability = this.currentState.globalStability;
       const aggressionChange = (1 - stability) * 0.1;
-      
+
       this.currentState.aiActivity.aggressionLevel = Math.min(
         1,
         this.currentState.aiActivity.aggressionLevel + aggressionChange
@@ -468,5 +578,6 @@ export class WorldStateManager extends EventEmitter {
     this.stop();
     this.activeEventTimers.forEach(timer => clearTimeout(timer));
     this.activeEventTimers.clear();
+    this.climateSystem.cleanup();
   }
 }

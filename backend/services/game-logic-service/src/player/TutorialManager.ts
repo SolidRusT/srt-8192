@@ -1,4 +1,4 @@
-import { TutorialService, TutorialStep } from '../../tutorial-service/src/TutorialService';
+import { TutorialService, TutorialStep } from '../../../tutorial-service/src/TutorialService';
 
 export class TutorialManager {
   private tutorialService: TutorialService;

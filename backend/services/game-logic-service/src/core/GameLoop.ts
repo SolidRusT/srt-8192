@@ -9,7 +9,7 @@ import {
   GameEventType,
   EventVisibility,
   ServerGameCycle
-} from './types';
+} from '../types';
 
 interface GameLoopConfig {
   cycleLength: number;
