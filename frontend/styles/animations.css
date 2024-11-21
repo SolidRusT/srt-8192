@@ -1,0 +1,50 @@
+/* Animations.css - Add animations for UI interactions */
+
+/* Fade in animation for elements */
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  /* Pulse animation for resource updates */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .pulse {
+    animation: pulse 0.6s ease-in-out;
+  }
+  
+  /* Slide in from left for notifications */
+  @keyframes slideInLeft {
+    0% { transform: translateX(-100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  
+  .slide-in-left {
+    animation: slideInLeft 0.7s ease-out;
+  }
+  
+  /* Flash animation for achievements */
+  @keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  .flash {
+    animation: flash 1s ease-in-out infinite;
+  }
+  
+  /* Usage examples: 
+     - Add 'fade-in' to elements for fade-in effect on load.
+     - Use 'pulse' to emphasize resource changes.
+     - Apply 'slide-in-left' for notification elements.
+     - Attach 'flash' to achievement alerts.
+  */
+  
