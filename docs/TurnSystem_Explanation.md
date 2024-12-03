@@ -34,7 +34,9 @@ Each turn is divided into the following phases:
 ### Timing and Turn Limitations
 
 - **Turn Timer**: Each turn has a **maximum duration**, providing a limited window in which to complete actions. This ensures the game progresses smoothly and keeps players engaged.
-  - Default Timer: Each turn lasts up to **60 seconds**, after which any unfinished actions are automatically finalized.
+  - Default Timer: Each turn lasts up to **73.828 seconds**, which aligns perfectly with the updated game cycle duration to ensure synchronization.
+
+- **Game Cycle Timer**: The game progresses with **8,192 game cycles** spanning across **two weeks**. Each game cycle lasts **73.828 seconds**, allowing for perfect alignment with the two-week period without requiring downtime or leftover time. This ensures the game world resets exactly after two weeks, keeping all players on the same rhythm.
 
 - **Max Turns Per Cycle**: A game cycle can contain a maximum number of turns, defined in the **game settings** (e.g., **100 turns** per cycle). Once the limit is reached, the game moves into a new cycle, where players may be rewarded for their progress.
 
@@ -67,6 +69,7 @@ To ensure fair play and balanced game flow, both player and AI turns are **synch
 - **Solution**: The AI is given a fixed time to process its decisions, using **parallel computation** when necessary to determine optimal actions without delaying the player's experience.
 
 ## Conclusion
-The turn-based system in 8192 is designed to provide a balanced, engaging, and strategic experience for players. By breaking down each turn into structured phases, players have time to consider their moves, while the AI remains adaptable to keep the game challenging. Understanding these turn mechanics is essential for making modifications, adding new game features, and ensuring an optimal gameplay experience.
+The turn-based system in 8192 is designed to provide a balanced, engaging, and strategic experience for players. By breaking down each turn into structured phases, players have time to consider their moves, while the AI remains adaptable to keep the game challenging. The updated timing structure, with **73.828-second game cycles** extending across a **two-week period**, ensures synchronization without downtime, creating a seamless gameplay experience. Understanding these turn mechanics is essential for making modifications, adding new game features, and ensuring an optimal gameplay experience.
 
 For more detailed information on specific turn actions and their implementation, please refer to the **Turn Actions Implementation Guide** located in the `/docs` directory.
+
