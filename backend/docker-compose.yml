@@ -1,92 +1,182 @@
 version: '3.9'
 
+x-healthcheck: &default-healthcheck
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:${PORT}/health"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 40s
+
+x-service-defaults: &service-defaults
+  <<: *default-healthcheck
+  restart: unless-stopped
+  networks:
+    - srt-8192-network
+
 services:
   game-logic:
+    <<: *service-defaults
     build: ./services/game-logic-service
     ports: ["5001:5001"]
     env_file: ./services/game-logic-service/.env
-    depends_on: [mongodb, redis]
+    environment:
+      - PORT=5001
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   ai-service:
+    <<: *service-defaults
     build: ./services/ai-service
     ports: ["5002:5002"]
     env_file: ./services/ai-service/.env
-    depends_on: [mongodb]
+    environment:
+      - PORT=5002
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
   data-integration:
+    <<: *service-defaults
     build: ./services/data-integration
     ports: ["5003:5003"]
     env_file: ./services/data-integration/.env
-    depends_on: [mongodb]
+    environment:
+      - PORT=5003
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
   economy:
+    <<: *service-defaults
     build: ./services/economy-management
     ports: ["5004:5004"]
     env_file: ./services/economy-management/.env
-    depends_on: [mongodb]
+    environment:
+      - PORT=5004
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
   leaderboard:
+    <<: *service-defaults
     build: ./services/leaderboard-service
     ports: ["5005:5005"]
     env_file: ./services/leaderboard-service/.env
-    depends_on: [mongodb]
+    environment:
+      - PORT=5005
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
   matchmaking:
+    <<: *service-defaults
     build: ./services/matchmaking-service
     ports: ["5006:5006"]
     env_file: ./services/matchmaking-service/.env
-    depends_on: [redis]
+    environment:
+      - PORT=5006
+    depends_on:
+      redis:
+        condition: service_healthy
 
   notifications:
+    <<: *service-defaults
     build: ./services/notification-service
     ports: ["5007:5007"]
     env_file: ./services/notification-service/.env
-    depends_on: [redis]
+    environment:
+      - PORT=5007
+    depends_on:
+      redis:
+        condition: service_healthy
 
   persistence:
+    <<: *service-defaults
     build: ./services/persistence-service
     ports: ["5008:5008"]
     env_file: ./services/persistence-service/.env
-    depends_on: [mongodb]
+    environment:
+      - PORT=5008
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
   rewards:
+    <<: *service-defaults
     build: ./services/rewards-service
     ports: ["5009:5009"]
     env_file: ./services/rewards-service/.env
-    depends_on: [mongodb]
+    environment:
+      - PORT=5009
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
   social:
+    <<: *service-defaults
     build: ./services/social-service
     ports: ["5010:5010"]
     env_file: ./services/social-service/.env
-    depends_on: [mongodb, redis]
+    environment:
+      - PORT=5010
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   tutorial:
+    <<: *service-defaults
     build: ./services/tutorial-service
     ports: ["5011:5011"]
     env_file: ./services/tutorial-service/.env
-    depends_on: [mongodb]
+    environment:
+      - PORT=5011
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
   user:
+    <<: *service-defaults
     build: ./services/user-service
     ports: ["5012:5012"]
     env_file: ./services/user-service/.env
-    depends_on: [mongodb]
+    environment:
+      - PORT=5012
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
   mongodb:
     image: mongo:latest
     ports: ["27017:27017"]
     volumes: [mongodb_data:/data/db]
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   redis:
     image: redis:alpine
     ports: ["6379:6379"]
     volumes: [redis_data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   mongodb_data:
   redis_data:
 
 networks:
-  default:
+  srt-8192-network:
     name: srt-8192-network

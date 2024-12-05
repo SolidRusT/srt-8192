@@ -1,0 +1,30 @@
+{
+  "name": "@srt-8192/backend",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "shared/*",
+    "lib/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "start": "docker-compose up",
+    "start:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up",
+    "start:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces",
+    "generate:env": "node scripts/generate-env.js"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,90 +1,105 @@
 version: '3.9'
 
-services:
-  base-service:
-    build: 
-      context: ./services/base
-      dockerfile: Dockerfile
-      target: development
-    ports: 
-      - "8080:8080"
-    volumes:
-      - ./services/base/src:/app/src
-      - ./services/base/tests:/app/tests
-      - base-service-node-modules:/app/node_modules
-    environment:
-      - NODE_ENV=development
-      - ENABLE_HOT_RELOAD=true
-      - DEBUG_MODE=true
-    env_file:
-      - ./services/base/.env.development
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+x-dev-service: &dev-service
+  volumes:
+    - ./services/${SERVICE_NAME}/src:/app/src
+    - ./services/${SERVICE_NAME}/node_modules:/app/node_modules
+  command: npm run dev
+  environment:
+    - NODE_ENV=development
+    - TS_NODE_DEV=true
 
+services:
+  game-logic:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=game-logic-service
+      - PORT=5001
+
+  ai-service:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=ai-service
+      - PORT=5002
+
+  data-integration:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=data-integration
+      - PORT=5003
+
+  economy:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=economy-management
+      - PORT=5004
+
+  leaderboard:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=leaderboard-service
+      - PORT=5005
+
+  matchmaking:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=matchmaking-service
+      - PORT=5006
+
+  notifications:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=notification-service
+      - PORT=5007
+
+  persistence:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=persistence-service
+      - PORT=5008
+
+  rewards:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=rewards-service
+      - PORT=5009
+
+  social:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=social-service
+      - PORT=5010
+
+  tutorial:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=tutorial-service
+      - PORT=5011
+
+  user:
+    <<: *dev-service
+    environment:
+      - SERVICE_NAME=user-service
+      - PORT=5012
+
+  # Development-specific overrides for MongoDB
   mongodb:
-    image: mongo:latest
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
+      - mongodb_dev_data:/data/db
+      - ./config/mongodb:/docker-entrypoint-initdb.d
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      - MONGODB_DATABASE=srt8192_dev
 
+  # Development-specific overrides for Redis
   redis:
-    image: redis:alpine
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
-
-  # Development tools
-  mongo-express:
-    image: mongo-express
-    ports:
-      - "8081:8081"
-    environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=admin
-      - ME_CONFIG_MONGODB_SERVER=mongodb
-    depends_on:
-      mongodb:
-        condition: service_healthy
-
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    ports:
-      - "8082:8081"
-    environment:
-      - REDIS_HOSTS=redis:redis:6379
-    depends_on:
-      redis:
-        condition: service_healthy
+      - redis_dev_data:/data
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
 
 volumes:
-  mongodb_data:
-  mongodb_config:
-  redis_data:
-  base-service-node-modules:
+  mongodb_dev_data:
+  redis_dev_data:
