@@ -1,8 +1,8 @@
 # Variables
 SHELL := /bin/bash
 DOCKER_COMPOSE := docker compose
-PROJECT_NAME := future-earth
-SERVICES := game-logic ai-service data-integration economy leaderboard matchmaking notifications
+PROJECT_NAME := srt-8192
+SERVICES := api-gateway game-logic ai-service data-integration economy leaderboard matchmaking notifications persistence rewards social tutorial user
 
 # Colors for output
 BLUE := \033[34m
@@ -14,18 +14,24 @@ RESET := \033[0m
 ENV ?= dev
 DOCKER_PROJECT := $(PROJECT_NAME)-$(ENV)
 
-.PHONY: help build test test-all test-integration lint-all clean setup logs health-check
+.PHONY: help build test test-all test-integration lint-all clean setup logs health-check generate-env
 
 help: ## Show this help message
-	@echo -e "$(BLUE)Future Earth Testing Commands:$(RESET)"
+	@echo -e "$(BLUE)8192 Development Commands:$(RESET)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(GREEN)%-30s$(RESET) %s\n", $$1, $$2}'
 
-setup: ## Build base image and setup development environment
-	@echo -e "$(BLUE)Building base service image...$(RESET)"
-	cd backend/services/base && docker build -t srt-8192/base-service -f Dockerfile .
-	@echo -e "$(GREEN)Base image built successfully$(RESET)"
+setup: ## Install dependencies and generate environment files
+	@echo -e "$(BLUE)Setting up development environment...$(RESET)"
+	npm install
+	npm run generate:env
+	@echo -e "$(GREEN)Setup complete$(RESET)"
 
-build: setup ## Build all services
+generate-env: ## Generate environment files for all services
+	@echo -e "$(BLUE)Generating environment files...$(RESET)"
+	npm run generate:env
+	@echo -e "$(GREEN)Environment files generated$(RESET)"
+
+build: generate-env ## Build all services
 	@echo -e "$(BLUE)Building all services...$(RESET)"
 	$(DOCKER_COMPOSE) -p $(DOCKER_PROJECT) build
 	@echo -e "$(GREEN)Build complete$(RESET)"
@@ -34,6 +40,8 @@ start: ## Start the development environment
 	@echo -e "$(BLUE)Starting development environment...$(RESET)"
 	$(DOCKER_COMPOSE) -p $(DOCKER_PROJECT) up -d
 	@echo -e "$(GREEN)Environment started$(RESET)"
+
+dev: build start ## Build and start development environment
 
 stop: ## Stop the development environment
 	@echo -e "$(BLUE)Stopping development environment...$(RESET)"
@@ -46,15 +54,15 @@ test: ## Run tests for a specific service (usage: make test SERVICE=ai-service)
 		exit 1; \
 	fi
 	@echo -e "$(BLUE)Running tests for $(SERVICE)...$(RESET)"
-	@cd backend/services/$(SERVICE) && npm test
+	@if [ "$(SERVICE)" = "frontend" ]; then \
+		cd frontend && npm test; \
+	else \
+		cd backend/services/$(SERVICE) && npm test; \
+	fi
 
 test-all: ## Run tests for all services
 	@echo -e "$(BLUE)Running tests for all services...$(RESET)"
-	@for service in $(SERVICES); do \
-		echo -e "$(BLUE)Testing $$service...$(RESET)"; \
-		cd backend/services/$$service && npm test || exit 1; \
-		cd ../../../; \
-	done
+	npm test
 	@echo -e "$(GREEN)All tests completed$(RESET)"
 
 test-integration: ## Run integration tests
@@ -68,6 +76,7 @@ test-integration: ## Run integration tests
 
 lint-all: ## Run linting for all services
 	@echo -e "$(BLUE)Running linting for all services...$(RESET)"
+	@cd frontend && npm run lint
 	@for service in $(SERVICES); do \
 		echo -e "$(BLUE)Linting $$service...$(RESET)"; \
 		cd backend/services/$$service && npm run lint || exit 1; \
@@ -89,9 +98,16 @@ logs: ## View logs for a specific service (usage: make logs SERVICE=ai-service)
 
 health-check: ## Run health checks for all services
 	@echo -e "$(BLUE)Running health checks...$(RESET)"
-	@for port in {5001..5007}; do \
-		echo -e "Checking service on port $$port..."; \
-		curl -s http://localhost:$$port/health || echo -e "$(RED)Failed$(RESET)"; \
+	@echo "Frontend (3000):"
+	@curl -s http://localhost:3000/api/health || echo -e "$(RED)Failed$(RESET)"
+	@echo "API Gateway (5000):"
+	@curl -s http://localhost:5000/health || echo -e "$(RED)Failed$(RESET)"
+	@for service in $(SERVICES); do \
+		port=$$(docker-compose port $$service 5000 2>/dev/null | cut -d: -f2); \
+		if [ ! -z "$$port" ]; then \
+			echo "$$service ($$port):"; \
+			curl -s http://localhost:$$port/health || echo -e "$(RED)Failed$(RESET)"; \
+		fi \
 	done
 	@echo -e "$(GREEN)Health checks completed$(RESET)"
 

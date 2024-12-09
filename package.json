@@ -12,9 +12,15 @@
     "down": "docker-compose down",
     "clean": "docker-compose down -v",
     "logs": "docker-compose logs -f",
-    "test": "cd backend && npm test && cd ../frontend && npm test"
+    "test": "cd backend && npm test && cd ../frontend && npm test",
+    "health": "node scripts/health-check.js",
+    "health:db": "node scripts/db-check.js",
+    "health:all": "npm run health && npm run health:db"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2"
   }
 }
