@@ -1,6 +1,9 @@
 import { GameAction } from '../../types/GameState';
 import { GameActionHandler, GameActionContext, GameActionResult } from './GameActionHandler';
 import { ResourceCollectionAction } from './ResourceCollectionAction';
+import { CombatAction } from './CombatAction';
+import { ResearchAction } from './ResearchAction';
+import { DiplomacyAction } from './DiplomacyAction';
 
 export class GameActionRegistry {
   private handlers: Map<string, GameActionHandler>;
@@ -11,16 +14,11 @@ export class GameActionRegistry {
   }
 
   private registerDefaultHandlers(): void {
-    // Register the resource collection action
-    const resourceCollectionAction = new ResourceCollectionAction();
-    this.registerHandler(resourceCollectionAction);
-
-    // Additional action handlers would be registered here
-    // For example:
-    // this.registerHandler(new CombatAction());
-    // this.registerHandler(new BuildStructureAction());
-    // this.registerHandler(new ResearchAction());
-    // etc.
+    // Register all action handlers
+    this.registerHandler(new ResourceCollectionAction());
+    this.registerHandler(new CombatAction());
+    this.registerHandler(new ResearchAction());
+    this.registerHandler(new DiplomacyAction());
   }
 
   registerHandler(handler: GameActionHandler): void {
@@ -46,8 +44,24 @@ export class GameActionRegistry {
         };
       }
 
-      return await handler.execute(action, context);
+      const result = await handler.execute(action, context);
+      
+      // Log action execution for analytics
+      console.log(`Action executed: ${action.actionType}`, {
+        gameId: context.gameId,
+        playerId: context.playerId,
+        success: result.success,
+        cycle: context.currentCycle
+      });
+
+      return result;
     } catch (error) {
+      console.error(`Action execution failed: ${action.actionType}`, {
+        gameId: context.gameId,
+        playerId: context.playerId,
+        error: error.message
+      });
+
       return {
         success: false,
         changes: {},
@@ -71,5 +85,41 @@ export class GameActionRegistry {
 
   getRegisteredActionTypes(): string[] {
     return Array.from(this.handlers.keys());
+  }
+
+  validateActionParameters(action: GameAction): boolean {
+    // Basic parameter validation based on action type
+    switch (action.actionType) {
+      case 'COLLECT_RESOURCE':
+        return this.validateResourceCollection(action);
+      case 'COMBAT':
+        return this.validateCombat(action);
+      case 'RESEARCH':
+        return this.validateResearch(action);
+      case 'DIPLOMACY':
+        return this.validateDiplomacy(action);
+      default:
+        return false;
+    }
+  }
+
+  private validateResourceCollection(action: GameAction): boolean {
+    const required = ['resourceType', 'territoryId', 'amount'];
+    return required.every(param => param in action.parameters);
+  }
+
+  private validateCombat(action: GameAction): boolean {
+    const required = ['targetTerritoryId', 'attackingUnits', 'combatType'];
+    return required.every(param => param in action.parameters);
+  }
+
+  private validateResearch(action: GameAction): boolean {
+    const required = ['technologyType', 'investmentAmount'];
+    return required.every(param => param in action.parameters);
+  }
+
+  private validateDiplomacy(action: GameAction): boolean {
+    const required = ['actionType', 'targetPlayerId'];
+    return required.every(param => param in action.parameters);
   }
 }
