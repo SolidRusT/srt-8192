@@ -1,0 +1,938 @@
+# Backend Microservices for 8192 Game
+# All services use the base image and extend with service-specific configuration
+
+---
+# Game Logic Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-logic
+  namespace: srt-8192
+  labels:
+    app: game-logic
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: game-logic
+  template:
+    metadata:
+      labels:
+        app: game-logic
+        component: backend
+    spec:
+      containers:
+      - name: game-logic
+        image: suparious/srt-8192-game-logic-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "game-logic"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-logic
+  namespace: srt-8192
+  labels:
+    app: game-logic
+spec:
+  type: ClusterIP
+  selector:
+    app: game-logic
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# AI Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+  namespace: srt-8192
+  labels:
+    app: ai-service
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+        component: backend
+    spec:
+      containers:
+      - name: ai-service
+        image: suparious/srt-8192-ai-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "ai-service"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-service
+  namespace: srt-8192
+  labels:
+    app: ai-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ai-service
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Data Integration Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-integration
+  namespace: srt-8192
+  labels:
+    app: data-integration
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: data-integration
+  template:
+    metadata:
+      labels:
+        app: data-integration
+        component: backend
+    spec:
+      containers:
+      - name: data-integration
+        image: suparious/srt-8192-data-integration:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "data-integration"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-integration
+  namespace: srt-8192
+  labels:
+    app: data-integration
+spec:
+  type: ClusterIP
+  selector:
+    app: data-integration
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Economy Management Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: economy
+  namespace: srt-8192
+  labels:
+    app: economy
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: economy
+  template:
+    metadata:
+      labels:
+        app: economy
+        component: backend
+    spec:
+      containers:
+      - name: economy
+        image: suparious/srt-8192-economy-management:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "economy"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: economy
+  namespace: srt-8192
+  labels:
+    app: economy
+spec:
+  type: ClusterIP
+  selector:
+    app: economy
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Leaderboard Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leaderboard
+  namespace: srt-8192
+  labels:
+    app: leaderboard
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: leaderboard
+  template:
+    metadata:
+      labels:
+        app: leaderboard
+        component: backend
+    spec:
+      containers:
+      - name: leaderboard
+        image: suparious/srt-8192-leaderboard-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "leaderboard"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: leaderboard
+  namespace: srt-8192
+  labels:
+    app: leaderboard
+spec:
+  type: ClusterIP
+  selector:
+    app: leaderboard
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Matchmaking Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matchmaking
+  namespace: srt-8192
+  labels:
+    app: matchmaking
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: matchmaking
+  template:
+    metadata:
+      labels:
+        app: matchmaking
+        component: backend
+    spec:
+      containers:
+      - name: matchmaking
+        image: suparious/srt-8192-matchmaking-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "matchmaking"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matchmaking
+  namespace: srt-8192
+  labels:
+    app: matchmaking
+spec:
+  type: ClusterIP
+  selector:
+    app: matchmaking
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Notification Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifications
+  namespace: srt-8192
+  labels:
+    app: notifications
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notifications
+  template:
+    metadata:
+      labels:
+        app: notifications
+        component: backend
+    spec:
+      containers:
+      - name: notifications
+        image: suparious/srt-8192-notification-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "notifications"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifications
+  namespace: srt-8192
+  labels:
+    app: notifications
+spec:
+  type: ClusterIP
+  selector:
+    app: notifications
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Persistence Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: persistence
+  namespace: srt-8192
+  labels:
+    app: persistence
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: persistence
+  template:
+    metadata:
+      labels:
+        app: persistence
+        component: backend
+    spec:
+      containers:
+      - name: persistence
+        image: suparious/srt-8192-persistence-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "persistence"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: persistence
+  namespace: srt-8192
+  labels:
+    app: persistence
+spec:
+  type: ClusterIP
+  selector:
+    app: persistence
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Rewards Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rewards
+  namespace: srt-8192
+  labels:
+    app: rewards
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rewards
+  template:
+    metadata:
+      labels:
+        app: rewards
+        component: backend
+    spec:
+      containers:
+      - name: rewards
+        image: suparious/srt-8192-rewards-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "rewards"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rewards
+  namespace: srt-8192
+  labels:
+    app: rewards
+spec:
+  type: ClusterIP
+  selector:
+    app: rewards
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Social Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social
+  namespace: srt-8192
+  labels:
+    app: social
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: social
+  template:
+    metadata:
+      labels:
+        app: social
+        component: backend
+    spec:
+      containers:
+      - name: social
+        image: suparious/srt-8192-social-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "social"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social
+  namespace: srt-8192
+  labels:
+    app: social
+spec:
+  type: ClusterIP
+  selector:
+    app: social
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Tutorial Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tutorial
+  namespace: srt-8192
+  labels:
+    app: tutorial
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tutorial
+  template:
+    metadata:
+      labels:
+        app: tutorial
+        component: backend
+    spec:
+      containers:
+      - name: tutorial
+        image: suparious/srt-8192-tutorial-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "tutorial"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tutorial
+  namespace: srt-8192
+  labels:
+    app: tutorial
+spec:
+  type: ClusterIP
+  selector:
+    app: tutorial
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# User Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  namespace: srt-8192
+  labels:
+    app: user
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+        component: backend
+    spec:
+      containers:
+      - name: user
+        image: suparious/srt-8192-user-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "user"
+        - name: PORT
+          value: "8080"
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb.srt-8192.svc.cluster.local:27017/srt8192"
+        - name: REDIS_URL
+          value: "redis://redis.srt-8192.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user
+  namespace: srt-8192
+  labels:
+    app: user
+spec:
+  type: ClusterIP
+  selector:
+    app: user
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP

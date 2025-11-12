@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: srt-8192
+  labels:
+    name: srt-8192
+    app: srt-8192
+    tier: game

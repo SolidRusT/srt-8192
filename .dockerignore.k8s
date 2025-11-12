@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+.git
+.gitignore
+*.md
+.vscode
+.archive
+tests
+*.log
+npm-debug.log*
+k8s
+*.ps1
+.github
+docs
+config/grafana
+config/prometheus

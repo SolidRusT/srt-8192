@@ -1,0 +1,58 @@
+---
+# Ingress with TLS for 8192 Game
+# Routes:
+# - /          → Frontend (React SPA)
+# - /api/*     → API Gateway (backend)
+# - /ws        → API Gateway (WebSocket)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: srt-8192
+  namespace: srt-8192
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns01"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # WebSocket support for realtime game features
+    nginx.ingress.kubernetes.io/websocket-services: "api-gateway"
+    # Increase timeouts for long-running game sessions
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    # CORS for API
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://8192.lab.hq.solidrust.net"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - 8192.lab.hq.solidrust.net
+    secretName: srt-8192-tls
+  rules:
+  - host: 8192.lab.hq.solidrust.net
+    http:
+      paths:
+      # API Gateway routes
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 5000
+      # WebSocket route
+      - path: /ws
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 5000
+      # Frontend (catch-all, must be last)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 3000
