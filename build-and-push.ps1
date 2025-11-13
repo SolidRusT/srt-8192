@@ -115,7 +115,7 @@ function Invoke-DockerLogin {
         docker login
         Write-Success "Logged in to Docker Hub"
     } catch {
-        Write-Error "Docker login failed: $_"
+        Write-Error "Docker login failed: $($_.Exception.Message)"
         exit 1
     }
 }
@@ -134,7 +134,7 @@ function Build-BaseImage {
         Write-Success "Base image built: $imageName"
         return $true
     } catch {
-        Write-Error "Failed to build base image: $_"
+        Write-Error "Failed to build base image: $($_.Exception.Message)"
         return $false
     }
 }
@@ -162,7 +162,7 @@ function Build-BackendService {
         Write-Success "Built: $imageName"
         return $true
     } catch {
-        Write-Error "Failed to build $ServiceName: $_"
+        Write-Error "Failed to build $ServiceName`: $($_.Exception.Message)"
         return $false
     }
 }
@@ -181,7 +181,7 @@ function Build-Frontend {
         Write-Success "Built: $imageName"
         return $true
     } catch {
-        Write-Error "Failed to build frontend: $_"
+        Write-Error "Failed to build frontend: $($_.Exception.Message)"
         return $false
     }
 }
@@ -199,7 +199,7 @@ function Push-Image {
         Write-Success "Pushed: $ImageName"
         return $true
     } catch {
-        Write-Error "Failed to push $ImageName: $_"
+        Write-Error "Failed to push $ImageName`: $($_.Exception.Message)"
         return $false
     }
 }
