@@ -1,5 +1,5 @@
 # Extend from base service image
-FROM srt-8192/base-service:latest
+FROM suparious/srt-8192-base:latest
 
 # Switch to root to copy files
 USER root

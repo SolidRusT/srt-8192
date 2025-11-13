@@ -129,12 +129,12 @@ function Build-BaseImage {
     Write-Info "Building: $imageName"
     Write-Info "Context: $contextPath"
 
-    try {
-        docker build -t $imageName $contextPath
+    docker build -t $imageName $contextPath
+    if ($LASTEXITCODE -eq 0) {
         Write-Success "Base image built: $imageName"
         return $true
-    } catch {
-        Write-Error "Failed to build base image: $($_.Exception.Message)"
+    } else {
+        Write-Error "Failed to build base image (exit code: $LASTEXITCODE)"
         return $false
     }
 }
@@ -156,13 +156,13 @@ function Build-BackendService {
     Write-Info "Building: $imageName"
     Write-Info "Context: $contextPath"
 
-    try {
-        # Build with base image reference
-        docker build -t $imageName --build-arg BASE_IMAGE="${DOCKER_USER}/${IMAGE_PREFIX}-base:${IMAGE_TAG}" $contextPath
+    # Build with base image reference
+    docker build -t $imageName --build-arg BASE_IMAGE="${DOCKER_USER}/${IMAGE_PREFIX}-base:${IMAGE_TAG}" $contextPath
+    if ($LASTEXITCODE -eq 0) {
         Write-Success "Built: $imageName"
         return $true
-    } catch {
-        Write-Error "Failed to build $ServiceName`: $($_.Exception.Message)"
+    } else {
+        Write-Error "Failed to build $ServiceName (exit code: $LASTEXITCODE)"
         return $false
     }
 }
@@ -176,12 +176,12 @@ function Build-Frontend {
     Write-Info "Building: $imageName"
     Write-Info "Context: $contextPath"
 
-    try {
-        docker build -t $imageName $contextPath
+    docker build -t $imageName $contextPath
+    if ($LASTEXITCODE -eq 0) {
         Write-Success "Built: $imageName"
         return $true
-    } catch {
-        Write-Error "Failed to build frontend: $($_.Exception.Message)"
+    } else {
+        Write-Error "Failed to build frontend (exit code: $LASTEXITCODE)"
         return $false
     }
 }
@@ -194,12 +194,12 @@ function Push-Image {
 
     Write-Info "Pushing: $ImageName"
 
-    try {
-        docker push $ImageName
+    docker push $ImageName
+    if ($LASTEXITCODE -eq 0) {
         Write-Success "Pushed: $ImageName"
         return $true
-    } catch {
-        Write-Error "Failed to push $ImageName`: $($_.Exception.Message)"
+    } else {
+        Write-Error "Failed to push $ImageName (exit code: $LASTEXITCODE)"
         return $false
     }
 }
