@@ -79,7 +79,6 @@ metadata:
     component: cache
 spec:
   type: ClusterIP
-  clusterIP: None  # Headless service for StatefulSet
   selector:
     app: redis
   ports:

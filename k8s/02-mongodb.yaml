@@ -84,7 +84,6 @@ metadata:
     component: database
 spec:
   type: ClusterIP
-  clusterIP: None  # Headless service for StatefulSet
   selector:
     app: mongodb
   ports:
