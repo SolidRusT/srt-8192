@@ -27,52 +27,29 @@
 
 ---
 
-## 📚 PLATFORM INTEGRATION (ChromaDB Knowledge Base)
+## 📚 PLATFORM INTEGRATION
 
-**When working in this submodule**, you cannot access the parent srt-hq-k8s repository files. Use ChromaDB to query platform capabilities and integration patterns.
+### Platform Dependencies
 
-**Collection**: `srt-hq-k8s-platform-guide` (43 docs, updated 2025-11-11)
-
-**Why This Matters for 8192 Game**:
-The 8192 game is a complex microservices application that integrates deeply with the srt-hq-k8s platform:
-- **Ingress**: Uses nginx-ingress with TLS (cert-manager DNS-01) for HTTPS access
-- **Storage**: Requires persistent volumes (openebs-hostpath) for MongoDB and Redis data
-- **Networking**: Internal ClusterIP services for 12+ microservices + API gateway
-- **Monitoring**: Prometheus/Grafana integration for game metrics and performance
-- **WebSocket**: Nginx ingress configured for real-time game updates
-
-**Query When You Need**:
-- Platform architecture and three-tier taxonomy
-- Storage classes and PVC configuration patterns
-- Ingress patterns for HTTPS with cert-manager
-- Service networking (ClusterIP vs LoadBalancer)
-- Monitoring integration (Prometheus exporters)
-- Platform resource limits and node selectors
-
-**Example Queries**:
-```
-"What is the srt-hq-k8s platform architecture?"
-"How do I configure persistent storage for StatefulSets?"
-"What is the ingress pattern for HTTPS with cert-manager?"
-"How do I expose services internally vs externally?"
-"What monitoring tools are available on the platform?"
+```yaml
+requires:
+  core:
+    - ingress          # External HTTPS access + WebSocket support
+    - cert-manager     # SSL certificates
+    - truenas-storage  # NFS for MongoDB/Redis persistence
+optional:
+  services:
+    - observability    # Prometheus metrics scraping
 ```
 
-**When NOT to Query**:
-- ❌ React development (use frontend/README.md)
-- ❌ Game logic implementation (see backend/services/game-logic-service/)
-- ❌ Docker build process (use build-and-push.ps1)
-- ❌ Kubernetes manifest syntax (standard K8s documentation)
+**Related Repositories**:
+- **srt-hq-k8s**: `/Users/shaun/repos/srt-hq-k8s/` - Platform infrastructure
 
-**How to Query ChromaDB**:
-```typescript
-// Example: Query platform storage patterns
-const results = await mcp__chroma__chroma_query_documents({
-  collection_name: "srt-hq-k8s-platform-guide",
-  query_texts: ["persistent volume configuration for StatefulSets"],
-  n_results: 3
-});
-```
+**Platform Services Used**:
+- **Ingress**: nginx-ingress with WebSocket support
+- **Storage**: TrueNAS NFS for MongoDB and Redis
+
+**Note**: This app was removed from K8s due to Redis DNS resolution issues (Dec 27, 2025). Namespace retained for future redeployment.
 
 ---
 

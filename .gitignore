@@ -17,3 +17,5 @@ output.txt
 /public/*
 !/public/CNAME
 !/public/assets
+# Claude Code local settings (workstation-specific)
+.claude/settings.local.json
