@@ -620,6 +620,22 @@ All health endpoints should return HTTP 200.
 
 ---
 
+## Claude Code Configuration
+
+**Commands** (`.claude/commands/`):
+| Command | Description |
+|---------|-------------|
+| `/status` | Check K8s deployment and local dev status |
+| `/build` | Build Docker images or frontend |
+
+**MCP Tools** (`.mcp.json`):
+- `time` - Date calculations
+- `calculator` - Math operations
+- `github` - PR/issue management
+- `gitea` - Gitea PR/issue management
+
+---
+
 **Last Updated**: 2025-11-11
 **Maintained By**: Shaun Prince
 **Platform**: srt-hq-k8s (12-node Talos Kubernetes cluster)
